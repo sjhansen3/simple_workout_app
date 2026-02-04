@@ -17,6 +17,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Stupid Simple Workout",
   description: "Create workout plans. Share with anyone. Track your progress.",
+  metadataBase: new URL("https://stupidsimpleworkout.com"),
+  openGraph: {
+    title: "Stupid Simple Workout",
+    description: "Create workout plans. Share with anyone. Track your progress.",
+    url: "https://stupidsimpleworkout.com",
+    siteName: "Stupid Simple Workout",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Stupid Simple Workout",
+    description: "Create workout plans. Share with anyone. Track your progress.",
+  },
 };
 
 export default function RootLayout({
