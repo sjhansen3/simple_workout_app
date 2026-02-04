@@ -59,12 +59,12 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 font-bold">
           <Image
             src="/logo.png"
-            alt="Workout Lists"
+            alt="Stupid Simple Workout"
             width={28}
             height={28}
             className="h-7 w-7"
           />
-          <span className="text-base sm:text-lg">Workout Lists</span>
+          <span className="text-base sm:text-lg">Stupid Simple Workout</span>
         </Link>
 
         {loading ? (

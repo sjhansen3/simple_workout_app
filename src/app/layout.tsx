@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Workout Lists",
-  description: "Create, share, and complete workout lists",
+  title: "Stupid Simple Workout",
+  description: "Create workout plans. Share with anyone. Track your progress.",
 };
 
 export default function RootLayout({
@@ -31,6 +31,17 @@ export default function RootLayout({
       >
         <Navbar />
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
+        <footer className="py-6 text-center text-xs text-muted-foreground">
+          Made with ♥ by{" "}
+          <a
+            href="https://www.linkedin.com/in/stephenjhansen8/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground"
+          >
+            Stephen Hansen
+          </a>
+        </footer>
         <Toaster />
       </body>
     </html>
