@@ -123,3 +123,48 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Checkbox animations */
+@keyframes checkbox-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes checkbox-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-checkbox-pop {
+  animation: checkbox-pop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-checkbox-ripple {
+  animation: checkbox-ripple 0.4s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.animate-checkmark-draw {
+  animation: checkmark-draw 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

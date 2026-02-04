@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getList } from "@/lib/actions/lists";
 import type { Json, Target } from "@/types/database";
@@ -61,7 +62,7 @@ export default async function ListDetailPage({ params }: Props) {
                   <Link href={`/lists/${list.id}/edit`}>Edit</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/lists/${list.id}/log`}>View Log</Link>
+                  <Link href={`/lists/${list.id}/log`}>View Workout Log</Link>
                 </DropdownMenuItem>
                 <DeleteListButton listId={list.id} />
               </DropdownMenuContent>
@@ -103,13 +104,31 @@ export default async function ListDetailPage({ params }: Props) {
                           ))}
                         </div>
                       )}
+                      {Array.isArray(item.images) && item.images.length > 0 && (
+                        <div className="flex gap-2 mt-2">
+                          {(item.images as string[]).map((url, i) => (
+                            <div
+                              key={i}
+                              className="relative w-16 h-16 rounded-md overflow-hidden border"
+                            >
+                              <Image
+                                src={url}
+                                alt={`${item.name} - image ${i + 1}`}
+                                fill
+                                className="object-cover"
+                                sizes="64px"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <p className="text-muted-foreground">No exercises in this list.</p>
+            <p className="text-muted-foreground">No exercises in this plan.</p>
           )}
         </CardContent>
       </Card>

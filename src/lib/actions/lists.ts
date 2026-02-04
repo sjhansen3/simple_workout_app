@@ -10,6 +10,7 @@ export type ListItemInput = {
   name: string;
   description?: string;
   targets: Target[];
+  images?: string[];
   sort_order: number;
 };
 
@@ -52,6 +53,7 @@ export async function createList(input: CreateListInput) {
       name: item.name,
       description: item.description || null,
       targets: item.targets,
+      images: item.images || [],
       sort_order: index,
     }));
 
@@ -122,6 +124,7 @@ export async function updateList(
           name: item.name,
           description: item.description || null,
           targets: item.targets,
+          images: item.images || [],
           sort_order: item.sort_order,
         })
         .eq("id", item.id);
@@ -132,6 +135,7 @@ export async function updateList(
         name: item.name,
         description: item.description || null,
         targets: item.targets,
+        images: item.images || [],
         sort_order: item.sort_order,
       });
     }
@@ -228,6 +232,7 @@ export type ListSummary = {
   description: string | null;
   created_at: string;
   updated_at: string;
+  list_items: { id: string }[];
 };
 
 export async function getUserLists(): Promise<ListSummary[]> {
@@ -243,7 +248,7 @@ export async function getUserLists(): Promise<ListSummary[]> {
 
   const { data: lists, error } = await supabase
     .from("lists")
-    .select("*")
+    .select("*, list_items(id)")
     .eq("owner_user_id", user.id)
     .order("updated_at", { ascending: false });
 
@@ -271,7 +276,7 @@ export async function getSavedLists(): Promise<ListSummary[]> {
       `
       list_id,
       created_at,
-      lists (*)
+      lists (*, list_items(id))
     `
     )
     .eq("user_id", user.id)
@@ -281,5 +286,82 @@ export async function getSavedLists(): Promise<ListSummary[]> {
     return [];
   }
 
-  return savedLists.map((sl) => sl.lists).filter(Boolean);
+  return savedLists.map((sl) => sl.lists).filter(Boolean) as ListSummary[];
+}
+
+/**
+ * Copy a list to the current user's account
+ */
+export async function copyList(listId: string): Promise<string> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in to copy a workout");
+  }
+
+  // Get the original list with items
+  const { data: originalList, error: listError } = await supabase
+    .from("lists")
+    .select(
+      `
+      *,
+      list_items (*)
+    `
+    )
+    .eq("id", listId)
+    .single();
+
+  if (listError || !originalList) {
+    throw new Error("Could not find the workout to copy");
+  }
+
+  // Create a new list for the current user
+  const { data: newList, error: createError } = await supabase
+    .from("lists")
+    .insert({
+      title: originalList.title,
+      description: originalList.description,
+      owner_user_id: user.id,
+    })
+    .select()
+    .single();
+
+  if (createError || !newList) {
+    throw new Error("Failed to copy workout");
+  }
+
+  // Copy all list items
+  if (originalList.list_items && originalList.list_items.length > 0) {
+    const itemsToInsert = originalList.list_items.map(
+      (item: {
+        name: string;
+        description: string | null;
+        targets: Json;
+        sort_order: number;
+      }) => ({
+        list_id: newList.id,
+        name: item.name,
+        description: item.description,
+        targets: item.targets,
+        sort_order: item.sort_order,
+      })
+    );
+
+    const { error: itemsError } = await supabase
+      .from("list_items")
+      .insert(itemsToInsert);
+
+    if (itemsError) {
+      // Clean up the list if items failed
+      await supabase.from("lists").delete().eq("id", newList.id);
+      throw new Error("Failed to copy workout exercises");
+    }
+  }
+
+  revalidatePath("/");
+  return newList.id;
 }

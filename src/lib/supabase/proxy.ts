@@ -3,13 +3,17 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
 
 export async function updateSession(request: NextRequest) {
+  // Create initial response
   let supabaseResponse = NextResponse.next({
     request,
   });
 
+  // Log for debugging (remove in production)
+  console.log("[Proxy] Processing request:", request.nextUrl.pathname);
+
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -30,8 +34,13 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
-  await supabase.auth.getUser();
+  // IMPORTANT: This refreshes the session if expired and updates cookies
+  // Do NOT remove this line - it ensures the session stays valid
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log("[Proxy] User:", user?.email || "none");
 
   // Handle anonymous session ID
   const anonSessionId = request.cookies.get("anon_session_id")?.value;

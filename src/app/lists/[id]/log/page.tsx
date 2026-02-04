@@ -1,12 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { getList } from "@/lib/actions/lists";
 import { getCompletionsForList } from "@/lib/actions/completions";
-import { createShareLink } from "@/lib/actions/share";
 import { Button } from "@/components/ui/button";
 import { LogEntry } from "@/components/logs/log-entry";
-import { ShareLogButton } from "@/components/logs/share-log-button";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -20,27 +17,19 @@ export default async function ListLogPage({ params }: Props) {
     notFound();
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const completions = await getCompletionsForList(id);
 
   return (
     <div className="container mx-auto max-w-2xl py-8 px-4">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <Link
-            href={`/lists/${id}`}
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            &larr; Back to list
-          </Link>
-          <h1 className="text-2xl font-bold mt-2">{list.title}</h1>
-          <p className="text-muted-foreground">Your completion history</p>
-        </div>
-        {user && <ShareLogButton listId={id} userId={user.id} />}
+      <div className="mb-6">
+        <Link
+          href={`/lists/${id}`}
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          &larr; Back to plan
+        </Link>
+        <h1 className="text-2xl font-bold mt-2">{list.title}</h1>
+        <p className="text-muted-foreground">Your workout log</p>
       </div>
 
       {completions.length === 0 ? (

@@ -16,6 +16,7 @@ export type ItemResult = {
 export type CreateCompletionInput = {
   list_id: string;
   notes?: string;
+  reaction?: string;
   results: ItemResult[];
 };
 
@@ -27,6 +28,7 @@ export type CompletionWithResults = {
   completed_at: string;
   week_start: string;
   notes: string | null;
+  reaction: string | null;
   list_item_results: Array<{
     id: string;
     completion_id: string;
@@ -67,6 +69,7 @@ export async function createCompletion(input: CreateCompletionInput) {
       anon_session_id: user ? null : anonSessionId,
       week_start: weekStart,
       notes: input.notes || null,
+      reaction: input.reaction || null,
     })
     .select()
     .single();
@@ -136,7 +139,7 @@ export async function getCompletionsForList(listId: string): Promise<CompletionW
     return [];
   }
 
-  return data;
+  return data as CompletionWithResults[];
 }
 
 export async function getWeeklyCompletions(): Promise<WeeklyCompletion[]> {
@@ -174,7 +177,7 @@ export async function getWeeklyCompletions(): Promise<WeeklyCompletion[]> {
     return [];
   }
 
-  return data;
+  return data as WeeklyCompletion[];
 }
 
 export async function getCompletionCount() {

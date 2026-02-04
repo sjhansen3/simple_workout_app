@@ -278,6 +278,46 @@ export interface Database {
           }
         ];
       };
+      log_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          share_link_id: string;
+          nickname: string | null;
+          email_digest: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          share_link_id: string;
+          nickname?: string | null;
+          email_digest?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          share_link_id?: string;
+          nickname?: string | null;
+          email_digest?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "log_subscriptions_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "log_subscriptions_share_link_id_fkey";
+            columns: ["share_link_id"];
+            referencedRelation: "share_links";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {

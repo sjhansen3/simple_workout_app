@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/lists";
 import type { Json, Target } from "@/types/database";
 import { toast } from "sonner";
+import { ImageUpload } from "./image-upload";
 
 function parseTargets(targets: Json): Target[] {
   if (!targets || !Array.isArray(targets)) return [];
@@ -30,6 +31,7 @@ type ListFormProps = {
       name: string;
       description: string | null;
       targets: Json;
+      images: Json;
       sort_order: number;
     }>;
   };
@@ -41,6 +43,7 @@ type FormItem = {
   name: string;
   description: string;
   targets: Target[];
+  images: string[];
 };
 
 export function ListForm({ list }: ListFormProps) {
@@ -54,6 +57,7 @@ export function ListForm({ list }: ListFormProps) {
       name: item.name,
       description: item.description || "",
       targets: parseTargets(item.targets),
+      images: Array.isArray(item.images) ? (item.images as string[]) : [],
     })) || []
   );
   const [deletedItemIds, setDeletedItemIds] = useState<string[]>([]);
@@ -67,6 +71,7 @@ export function ListForm({ list }: ListFormProps) {
         name: "",
         description: "",
         targets: [],
+        images: [],
       },
     ]);
   };
@@ -79,7 +84,7 @@ export function ListForm({ list }: ListFormProps) {
     setItems(items.filter((i) => i.tempId !== tempId));
   };
 
-  const updateItem = (tempId: string, field: keyof FormItem, value: string | Target[]) => {
+  const updateItem = (tempId: string, field: keyof FormItem, value: string | Target[] | string[]) => {
     setItems(
       items.map((item) =>
         item.tempId === tempId ? { ...item, [field]: value } : item
@@ -152,6 +157,7 @@ export function ListForm({ list }: ListFormProps) {
           value: typeof t.value === "string" ? (t.unit === "freetext" ? t.value : Number(t.value) || 0) : t.value,
           unit: t.unit,
         })),
+        images: item.images,
         sort_order: index,
       }));
 
@@ -165,14 +171,14 @@ export function ListForm({ list }: ListFormProps) {
           },
           deletedItemIds
         );
-        toast.success("List updated");
+        toast.success("Workout plan updated");
       } else {
         await createList({
           title: title.trim(),
           description: description.trim() || undefined,
           items: listItems,
         });
-        toast.success("List created");
+        toast.success("Workout plan created");
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -184,7 +190,7 @@ export function ListForm({ list }: ListFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{list ? "Edit List" : "Create New List"}</CardTitle>
+          <CardTitle>{list ? "Edit Workout Plan" : "Create Workout Plan"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -322,6 +328,16 @@ export function ListForm({ list }: ListFormProps) {
                           </div>
                         )}
                       </div>
+
+                      <div className="space-y-2">
+                        <Label>Images (optional)</Label>
+                        <ImageUpload
+                          images={item.images}
+                          onImagesChange={(images) =>
+                            updateItem(item.tempId, "images", images)
+                          }
+                        />
+                      </div>
                     </div>
                     <Button
                       type="button"
@@ -356,7 +372,7 @@ export function ListForm({ list }: ListFormProps) {
               : "Creating..."
             : list
             ? "Save Changes"
-            : "Create List"}
+            : "Create Plan"}
         </Button>
       </div>
     </form>
